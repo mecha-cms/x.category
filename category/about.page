@@ -1,0 +1,117 @@
+---
+title: Category
+description: List all pages in the current folder filtered by category.
+author: Taufik Nurrohman
+type: Markdown
+version: 1.0.0
+
+use:
+  '.\lot\x\page': 1
+...
+
+This extension activates the category feature by utilizing the `kind` property of the page. This extension will also add several new routes such as `http://127.0.0.1/blog/category/:category` on every page to allow users to list all pages in the current folder by a category.
+
+### Working with Category
+
+[Panel](https://github.com/mecha-cms/x.panel) extension can help you to automate everything. But, if you have to, you can still make this extension work even without the GUI feature. Before we start, you need to know how this extension works.
+
+#### Page Properties
+
+Get to know that this extension adds `category` property to the page only if the page contains `kind` property that is not empty:
+
+~~~ .php
+$page = Page::__set_state([
+    …
+    …
+    'category' => Category::__set_state([ … ]), // [^2]
+    'kind' => [1, 2, 3, 'c1'] // [^1]
+]);
+
+// [^1]: Category id exists together with tag IDs.
+// [^2]: This rich category data will be generated based on the available category ID.
+~~~
+
+#### File Structure
+
+Writing a category file is the same as writing a tag file:
+
+~~~ .txt
+.\
+└── lot\
+    └── category\
+        ├── bar\
+        │   └── id.data
+        ├── baz\
+        │   └── id.data
+        ├── foo\
+        │   └── id.data
+        ├── bar.page
+        ├── baz.page
+        └── foo.page
+~~~
+
+#### File Content
+
+Here’s an example of a category file content:
+
+~~~ .yaml
+---
+title: Category Name
+description: Short description about this category.
+...
+
+Long description about this category.
+~~~
+
+#### Connections
+
+To connect the category with current page, add a category ID along with the tag IDs in `kind.data` file, prefixed by `c`:
+
+~~~ .txt
+.\
+└── lot\
+    └── page\
+        ├── test-page\
+        │   └── kind.data
+        └── test-page.page
+~~~
+
+Example content of `kind.data` file, contains a category ID:
+
+~~~ .json
+[1, 2, 3, "c1"]
+~~~
+
+You can actually insert the `kind` property to the page header, but this method is a little inefficient in terms of performance:
+
+~~~ .yaml
+---
+title: Page Title
+description: Page description.
+author: Taufik Nurrohman
+type: Markdown
+kind: [1, 2, 3, c1]
+...
+
+Page content goes here.
+~~~
+
+Technically, you can enter more than one category ID, but this extension is not designed to accept multiple categories at once on a single page. [Tag](https://github.com/mecha-cms/x.tag) extension is more appropriate to use in this case. You can then change the path value from `/tag` to `/category` if you want.
+
+---
+
+### Variables
+
+A global variable `$category` will be available in categories page mode. This variable is an instance of the `Category` class which you can use to get the current category details.
+
+### Conditions
+
+These page conditional statements are available:
+
+ - `$site->is('categories')` → Return `true` if current items view is a categories view and is not empty.
+
+### Classes
+
+These HTML classes will be added to the `<html>` element that has a `class` attribute:
+
+ - `is:categories` → Will be added if current items view is a categories view and is not empty.
